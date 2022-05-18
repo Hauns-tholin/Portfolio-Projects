@@ -1,0 +1,135 @@
+--Exploring Group by and order by in employee demographics
+
+--This Query Counts how many people from each gender are in employee demograhics and the group by syntex creates a seperate column to represent that number
+SELECT Gender, Count(Gender)
+FROM EmployeeDemograhics
+GROUP BY Gender
+
+--If needed you can go more in depth as well, if you wanted to see the age and the gender of certain employees you can use a group by
+-- statement to figure that out as well
+ SELECT Gender, Age, Count(Gender)
+FROM EmployeeDemograhics
+GROUP BY Gender, Age
+
+--If you for insatnce, wanted to know how many employees were older than 35 you can find that out as well by adding a WHERE statement
+ SELECT Gender, Count(Gender)
+FROM EmployeeDemograhics
+WHERE Age > 35
+GROUP BY Gender
+
+--If you want to add a name to the new column you've created you can do that
+SELECT Gender, Count(Gender) AS CountGender
+FROM EmployeeDemographics
+WHERE Age > 35
+GROUP BY Gender
+ORDER BY CountGender DESC
+
+--Show casing Inner joins, Full/Left/Right and Outer Joins
+
+--Inner join
+--Combines tables with matching Employee ID
+SELECT *
+FROM AdventureWorks.dbo.EmployeeDemograhics
+Inner Join AdventureWorks.dbo.EmployeeSalary
+	ON EmployeeDemograhics.EmployeeID = EmployeeSalary.EmployeeID
+
+
+--Full Outer Join
+--Displays all the information in the case one of the employee IDs for one of the tables is missing
+SELECT *
+FROM AdventureWorks.dbo.EmployeeDemograhics
+Full Outer Join AdventureWorks.dbo.EmployeeSalary
+	ON EmployeeDemograhics.EmployeeID = EmployeeSalary.EmployeeID
+
+--Left Outer Join
+--Keeps all employeeID numbers displayed on the left table even if they don't match the right table
+--EmployeeIDs on the left table that don't match the right table are taken out
+SELECT *
+FROM AdventureWorks.dbo.EmployeeDemograhics
+Left Outer Join AdventureWorks.dbo.EmployeeSalary
+	ON EmployeeDemograhics.EmployeeID = EmployeeSalary.EmployeeID
+
+--Right outer Join
+--Keeps all employeeID numbers displayed on the right table even if they don't match the left table
+--EmployeeIds on the right table that don't match the left table are taken out
+SELECT *
+FROM AdventureWorks.dbo.EmployeeDemograhics
+Right Outer Join AdventureWorks.dbo.EmployeeSalary
+	ON EmployeeDemograhics.EmployeeID = EmployeeSalary.EmployeeID
+
+--If you were asked the question of how to find "which employees were paid the most in order?" this is how you would find out
+SELECT EmployeeSalary.EmployeeID, Firstname, Lastname, Jobtitle, Salary
+FROM AdventureWorks.dbo.EmployeeDemograhics
+Inner join AdventureWorks.dbo.EmployeeSalary
+	ON EmployeeDemograhics.EmployeeID = EmployeeSalary.EmployeeID
+ORDER BY Salary DESC
+
+--If you were asked "what is the average salary of a salesman?"
+SELECT Jobtitle, AVG(Salary)
+FROM AdventureWorks.dbo.EmployeeDemograhics
+Inner join AdventureWorks.dbo.EmployeeSalary
+	ON EmployeeDemograhics.EmployeeID = EmployeeSalary.EmployeeID
+Where JobTitle = Salesman
+GROUP BY Jobtitle
+
+--Exploring Unions
+--A Union is similar to join but can take two tables and combine the data into one column
+SELECT *
+FROM AdventureWorks.dbo.EmployeeDemograhics
+UNION
+SELECT *
+FROM AdventureWorks.dbo.WarehouseemployeDemograhics
+
+--A Union statement automatically removes duplicates, If you were looking for an employee that may fit both data tables you can use
+-- a "Union All" statement
+
+SELECT *
+FROM AdventureWorks.dbo.EmployeeDemograhics
+UNION ALL
+SELECT *
+FROM AdventureWorks.dbo.WarehouseemployeDemograhics
+ORDER BY EmployeeID
+
+--Exploring Case statements
+
+SELECT Firstname, Lastname, Age
+CASE
+	WHEN Age < 21 THEN 'baby'
+	WHEN Age between 22 and 65 then 'Adult'
+	ELSE 'Old'
+END
+FROM AdventureWorks.dbo.EmployeeDemograhics
+ORDER BY Age
+
+
+-- If you wanted to give all your employees raises due to the company performing well this year but you want to give certain genres
+-- of employees more of a raise than others (such as salesman due to their outstanding perforamnce) you can do that using a case statement
+SELECT Firstname, Lastname, jobtitle, Salary
+CASE
+	WHEN jobtitle = 'salesman' THEN Salary + (Salary * .10)
+	WHEN jobtitile = 'accountant' THEN Salary + (Salary * .5)
+	WHEN jobtitile = 'HR' THEN Salary + (Salary * .1)
+	ELSE Salary + (Salary * .3)
+	END AS SalaryAfterRaise
+FROM AdventureWorks.dbo.EmployeeDemograhics
+JOIN AdventureWorks.dbo.EmployeeSalary
+	ON EmployeeDemograhics.EmployeeID = EmployeeSalary.EmployeeID
+
+--Exploring the Having Clause
+
+SELECT Jobtitle COUNT(Jobtitle)
+FROM AdventureWorks.dbo.EmployeeDemograhics
+Join AdventureWorks.dbo.EmployeeSalary
+	ON EmployeeDemograhics.EmployeeID = EmployeeSalary.EmployeeID
+GROUP BY Jobtitle
+HAVING COUNT(Jobtitle) > 1
+
+--If you were asking "What job titles have an average salary higher than x" you can find that using a having clause
+
+SELECT Jobtitle, AVG(Salary)
+FROM AdventureWorks.dbo.EmployeeDemograhics
+Join AdventureWorks.dbo.EmployeeSalary
+	ON EmployeeDemograhics.EmployeeID = EmployeeSalary.EmployeeID
+GROUP BY Jobtitle
+HAVING AVG(Salary) > 45000
+ORDER BY AVG(Salary)
